@@ -24,6 +24,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.naari3.pingtoserver.PingToServerState.PingStatus;
+
 import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -33,14 +35,11 @@ public class PingToServer
     // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
 
-    protected enum PingStatus {
-        Started,
-        NotStarted
-    };
-
-    private PingStatus status = PingStatus.NotStarted;
+    private PingToServerState state;
 
     public PingToServer() {
+        this.state = new PingToServerState();
+
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 
@@ -111,35 +110,35 @@ public class PingToServer
 
     private void onWorldLoad(WorldEvent.Load event) {
         LOGGER.info("Load World {}", event);
-        status = PingStatus.Started;
+        this.state.setStatus(PingToServerState.PingStatus.Started);
     }
 
     private void onWorldUnload(WorldEvent.Unload event) {
         LOGGER.info("Unload World {}", event);
-        status = PingStatus.NotStarted;
+        this.state.setStatus(PingToServerState.PingStatus.NotStarted);
     }
 
 
     private void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START && status == PingStatus.Started) {
+        if (event.phase == TickEvent.Phase.START && this.state.getStatus() == PingStatus.Started) {
             LOGGER.info("AAAAAAAAAAAAAAAAAA ClientTick START");
         }
-        if (event.phase == TickEvent.Phase.END  && status == PingStatus.Started) {
+        if (event.phase == TickEvent.Phase.END  && this.state.getStatus() == PingStatus.Started) {
             LOGGER.info("AAAAAAAAAAAAAAAAAA ClientTick END");
         }
     }
 
     private void onRenderTick(TickEvent.RenderTickEvent event) {
-        if (event.phase == TickEvent.Phase.START  && status == PingStatus.Started) {
+        if (event.phase == TickEvent.Phase.START  && this.state.getStatus() == PingStatus.Started) {
             LOGGER.info("BBBBBBBBBBBBBBBBBB RenderTick START");
         }
-        if (event.phase == TickEvent.Phase.END && status == PingStatus.Started) {
+        if (event.phase == TickEvent.Phase.END && this.state.getStatus() == PingStatus.Started) {
             LOGGER.info("BBBBBBBBBBBBBBBBBB RenderTick END");
         }
     }
 
     private void onRenderWorldLast(RenderWorldLastEvent event) {
-        if (status == PingStatus.Started) {
+        if (this.state.getStatus() == PingStatus.Started) {
             LOGGER.info("CCCCCCCCCCCCCCCCCCCC RenderWorldLast END");
         }
     }
