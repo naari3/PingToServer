@@ -35,4 +35,10 @@ public class Pinger {
         return isReachable;
     }
 
+    public String getContent() {
+        if (this.responseTime == -1) {
+            return "Timeout";
+        }
+        return String.format("%d ms", this.responseTime);
+    }
 }
