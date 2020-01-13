@@ -1,9 +1,17 @@
-package com.example.examplemod;
+package net.naari3.pingtoserver;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.Minecraft;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
@@ -19,24 +27,43 @@ import org.apache.logging.log4j.Logger;
 import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
-@Mod("examplemod")
-public class ExampleMod
+@Mod("pingtoserver")
+public class PingToServer
 {
     // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public ExampleMod() {
+    protected enum PingStatus {
+        Started,
+        NotStarted
+    };
+
+    private PingStatus status = PingStatus.NotStarted;
+
+    public PingToServer() {
+        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus forgeBus = MinecraftForge.EVENT_BUS;
+
         // Register the setup method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+        modBus.addListener(this::setup);
         // Register the enqueueIMC method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
+        modBus.addListener(this::enqueueIMC);
         // Register the processIMC method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
+        modBus.addListener(this::processIMC);
         // Register the doClientStuff method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
+        modBus.addListener(this::doClientStuff);
 
         // Register ourselves for server and other game events we are interested in
-        MinecraftForge.EVENT_BUS.register(this);
+        forgeBus.register(this);
+
+        forgeBus.addListener(this::onWorldLoad);
+        forgeBus.addListener(this::onWorldUnload);
+
+        forgeBus.addListener(this::onClientTick);
+        forgeBus.addListener(this::onRenderTick);
+        forgeBus.addListener(this::onRenderWorldLast);
+
+        forgeBus.addListener(this::onRenderGameOverlayEvent);
     }
 
     private void setup(final FMLCommonSetupEvent event)
@@ -81,4 +108,46 @@ public class ExampleMod
             LOGGER.info("HELLO from Register Block");
         }
     }
+
+    private void onWorldLoad(WorldEvent.Load event) {
+        LOGGER.info("Load World {}", event);
+        status = PingStatus.Started;
+    }
+
+    private void onWorldUnload(WorldEvent.Unload event) {
+        LOGGER.info("Unload World {}", event);
+        status = PingStatus.NotStarted;
+    }
+
+
+    private void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.START && status == PingStatus.Started) {
+            LOGGER.info("AAAAAAAAAAAAAAAAAA ClientTick START");
+        }
+        if (event.phase == TickEvent.Phase.END  && status == PingStatus.Started) {
+            LOGGER.info("AAAAAAAAAAAAAAAAAA ClientTick END");
+        }
+    }
+
+    private void onRenderTick(TickEvent.RenderTickEvent event) {
+        if (event.phase == TickEvent.Phase.START  && status == PingStatus.Started) {
+            LOGGER.info("BBBBBBBBBBBBBBBBBB RenderTick START");
+        }
+        if (event.phase == TickEvent.Phase.END && status == PingStatus.Started) {
+            LOGGER.info("BBBBBBBBBBBBBBBBBB RenderTick END");
+        }
+    }
+
+    private void onRenderWorldLast(RenderWorldLastEvent event) {
+        if (status == PingStatus.Started) {
+            LOGGER.info("CCCCCCCCCCCCCCCCCCCC RenderWorldLast END");
+        }
+    }
+
+    public void onRenderGameOverlayEvent(RenderGameOverlayEvent event) {
+        if (event.getType() != RenderGameOverlayEvent.ElementType.DEBUG) return;
+
+        Minecraft.getInstance().fontRenderer.drawStringWithShadow("works", 100, 100, 0xffffffff);
+    }
+
 }
