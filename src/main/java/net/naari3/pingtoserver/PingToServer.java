@@ -12,6 +12,7 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
+import net.naari3.pingtoserver.pinger.IcmpPinger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
