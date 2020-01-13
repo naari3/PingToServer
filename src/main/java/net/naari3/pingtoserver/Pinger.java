@@ -28,7 +28,7 @@ public class Pinger {
         end = System.currentTimeMillis();
 
         if (isReachable) {
-            this.responseTime = start - end;
+            this.responseTime = end - start;
         } else {
             this.responseTime = -1;
         }
