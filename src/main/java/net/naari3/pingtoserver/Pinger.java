@@ -35,10 +35,10 @@ public class Pinger {
 
         this.isSuccess = response.getSuccessFlag();
         this.isTimeouted = response.getTimeoutFlag();
-        this.responseTime = response.getDuration();
+        this.responseTime = response.getRtt();
 
         if (response.getSuccessFlag()) {
-            LOGGER.debug(String.format("%s response: %d ms", this.host, response.getDuration()));
+            LOGGER.debug(String.format("%s response: %d ms", this.host, response.getRtt()));
         } else if (response.getTimeoutFlag()) {
             LOGGER.warn(String.format("%s timeout", this.host));
         } else {
