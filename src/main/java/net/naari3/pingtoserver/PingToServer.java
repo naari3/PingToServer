@@ -56,7 +56,7 @@ public class PingToServer {
         }
     }
 
-    public void onRenderGameOverlayEvent(RenderGameOverlayEvent event) {
+    private void onRenderGameOverlayEvent(RenderGameOverlayEvent event) {
         if (event.getType() != RenderGameOverlayEvent.ElementType.DEBUG) return;
 
         if (this.state.isStarted() && this.pinger != null) {
@@ -67,7 +67,7 @@ public class PingToServer {
         }
     }
 
-    public void onLoggedInEvent(LoggedInEvent event) {
+    private void onLoggedInEvent(LoggedInEvent event) {
         LOGGER.info("onLoggedInEvent");
         LOGGER.info(event.getResult());
         if (event.getResult() == Event.Result.DEFAULT) {
@@ -81,14 +81,14 @@ public class PingToServer {
         }
     }
 
-    public void onLoggedOutEvent(LoggedOutEvent event) {
+    private void onLoggedOutEvent(LoggedOutEvent event) {
         this.state.stop();
         this.pinger = null;
     }
 
     private int tickCounter = 0;
 
-    public void onTickEvent(ClientTickEvent event) {
+    private void onTickEvent(ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
 
         tickCounter++;
