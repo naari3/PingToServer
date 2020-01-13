@@ -4,13 +4,14 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedOutEvent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedInEvent;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedOutEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -27,6 +28,7 @@ import net.naari3.pingtoserver.PingToServerState.PingStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -67,6 +69,8 @@ public class PingToServer {
 
         forgeBus.addListener(this::onLoggedInEvent);
         forgeBus.addListener(this::onLoggedOutEvent);
+
+        forgeBus.addListener(this::onTickEvent);
     }
 
     private void setup(final FMLCommonSetupEvent event) {
@@ -150,7 +154,12 @@ public class PingToServer {
     public void onRenderGameOverlayEvent(RenderGameOverlayEvent event) {
         if (event.getType() != RenderGameOverlayEvent.ElementType.DEBUG) return;
 
-        Minecraft.getInstance().fontRenderer.drawStringWithShadow("works", 100, 100, 0xffffffff);
+        if (this.state.getStatus() == PingStatus.Started && this.pinger != null) {
+            float x = 150;
+            float y = 100;
+            int color = 0xffffffff;
+            Minecraft.getInstance().fontRenderer.drawStringWithShadow(this.pinger.getContent(), x, y, color);
+        }
     }
 
     public void onLoggedInEvent(LoggedInEvent event) {
@@ -170,5 +179,23 @@ public class PingToServer {
     public void onLoggedOutEvent(LoggedOutEvent event) {
         this.state.setStatus(PingStatus.NotStarted);
         this.pinger = null;
+    }
+
+    private int tickCounter = 0;
+
+    public void onTickEvent(ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) return;
+
+        tickCounter++;
+        if (tickCounter > 20) {
+            if (this.state.getStatus() == PingStatus.Started && this.pinger != null) {
+                try {
+                    this.pinger.ping();
+                } catch (IOException err) {
+                    LOGGER.warn(err);
+                }
+            }
+            tickCounter = 0;
+        }
     }
 }
