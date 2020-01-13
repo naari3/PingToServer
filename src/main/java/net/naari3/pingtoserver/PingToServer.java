@@ -3,14 +3,16 @@ package net.naari3.pingtoserver;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedOutEvent;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedInEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
@@ -21,21 +23,20 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.naari3.pingtoserver.PingToServerState.PingStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import net.naari3.pingtoserver.PingToServerState.PingStatus;
 
 import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("pingtoserver")
-public class PingToServer
-{
+public class PingToServer {
     // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
 
     private PingToServerState state;
+    private Pinger pinger;
 
     public PingToServer() {
         this.state = new PingToServerState();
@@ -63,10 +64,12 @@ public class PingToServer
         forgeBus.addListener(this::onRenderWorldLast);
 
         forgeBus.addListener(this::onRenderGameOverlayEvent);
+
+        forgeBus.addListener(this::onLoggedInEvent);
+        forgeBus.addListener(this::onLoggedOutEvent);
     }
 
-    private void setup(final FMLCommonSetupEvent event)
-    {
+    private void setup(final FMLCommonSetupEvent event) {
         // some preinit code
         LOGGER.info("HELLO FROM PREINIT");
         LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
@@ -77,19 +80,21 @@ public class PingToServer
         LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
     }
 
-    private void enqueueIMC(final InterModEnqueueEvent event)
-    {
+    private void enqueueIMC(final InterModEnqueueEvent event) {
         // some example code to dispatch IMC to another mod
-        InterModComms.sendTo("examplemod", "helloworld", () -> { LOGGER.info("Hello world from the MDK"); return "Hello world";});
+        InterModComms.sendTo("examplemod", "helloworld", () -> {
+            LOGGER.info("Hello world from the MDK");
+            return "Hello world";
+        });
     }
 
-    private void processIMC(final InterModProcessEvent event)
-    {
+    private void processIMC(final InterModProcessEvent event) {
         // some example code to receive and process InterModComms from other mods
         LOGGER.info("Got IMC {}", event.getIMCStream().
-                map(m->m.getMessageSupplier().get()).
+                map(m -> m.getMessageSupplier().get()).
                 collect(Collectors.toList()));
     }
+
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
@@ -99,7 +104,7 @@ public class PingToServer
 
     // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
     // Event bus for receiving Registry Events)
-    @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD)
+    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class RegistryEvents {
         @SubscribeEvent
         public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
@@ -110,7 +115,6 @@ public class PingToServer
 
     private void onWorldLoad(WorldEvent.Load event) {
         LOGGER.info("Load World {}", event);
-        this.state.setStatus(PingToServerState.PingStatus.Started);
     }
 
     private void onWorldUnload(WorldEvent.Unload event) {
@@ -121,25 +125,25 @@ public class PingToServer
 
     private void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START && this.state.getStatus() == PingStatus.Started) {
-            LOGGER.info("AAAAAAAAAAAAAAAAAA ClientTick START");
+//            LOGGER.info("AAAAAAAAAAAAAAAAAA ClientTick START");
         }
-        if (event.phase == TickEvent.Phase.END  && this.state.getStatus() == PingStatus.Started) {
-            LOGGER.info("AAAAAAAAAAAAAAAAAA ClientTick END");
+        if (event.phase == TickEvent.Phase.END && this.state.getStatus() == PingStatus.Started) {
+//            LOGGER.info("AAAAAAAAAAAAAAAAAA ClientTick END");
         }
     }
 
     private void onRenderTick(TickEvent.RenderTickEvent event) {
-        if (event.phase == TickEvent.Phase.START  && this.state.getStatus() == PingStatus.Started) {
-            LOGGER.info("BBBBBBBBBBBBBBBBBB RenderTick START");
+        if (event.phase == TickEvent.Phase.START && this.state.getStatus() == PingStatus.Started) {
+//            LOGGER.info("BBBBBBBBBBBBBBBBBB RenderTick START");
         }
         if (event.phase == TickEvent.Phase.END && this.state.getStatus() == PingStatus.Started) {
-            LOGGER.info("BBBBBBBBBBBBBBBBBB RenderTick END");
+//            LOGGER.info("BBBBBBBBBBBBBBBBBB RenderTick END");
         }
     }
 
     private void onRenderWorldLast(RenderWorldLastEvent event) {
         if (this.state.getStatus() == PingStatus.Started) {
-            LOGGER.info("CCCCCCCCCCCCCCCCCCCC RenderWorldLast END");
+//            LOGGER.info("CCCCCCCCCCCCCCCCCCCC RenderWorldLast END");
         }
     }
 
@@ -149,4 +153,22 @@ public class PingToServer
         Minecraft.getInstance().fontRenderer.drawStringWithShadow("works", 100, 100, 0xffffffff);
     }
 
+    public void onLoggedInEvent(LoggedInEvent event) {
+        LOGGER.info("onLoggedInEvent");
+        LOGGER.info(event.getResult());
+        if (event.getResult() == Event.Result.DEFAULT) {
+            ServerData server = Minecraft.getInstance().getCurrentServerData();
+            if (server != null) {
+                this.pinger = new Pinger(server.serverIP, 5000);
+                this.state.setStatus(PingToServerState.PingStatus.Started);
+                LOGGER.info(server.serverIP);
+            }
+            LOGGER.info("LOGGED IN!!!!!!!!!!!!!!!");
+        }
+    }
+
+    public void onLoggedOutEvent(LoggedOutEvent event) {
+        this.state.setStatus(PingStatus.NotStarted);
+        this.pinger = null;
+    }
 }
