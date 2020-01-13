@@ -12,7 +12,8 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.naari3.pingtoserver.pinger.IcmpPinger;
+import net.naari3.pingtoserver.pinger.Pinger;
+import net.naari3.pingtoserver.pinger.TcpPinger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,7 +26,7 @@ public class PingToServer {
     private static final Logger LOGGER = LogManager.getLogger();
 
     private PingToServerState state;
-    private IcmpPinger pinger;
+    private Pinger pinger;
 
     public PingToServer() {
         this.state = new PingToServerState();
@@ -76,7 +77,7 @@ public class PingToServer {
             if (server != null) {
                 LOGGER.info(server.serverIP);
                 try {
-                    this.pinger = new IcmpPinger(server.serverIP, 5000);
+                    this.pinger = new TcpPinger(server.serverIP, 5000);
                     this.state.start();
                 } catch (URISyntaxException err) {
                     LOGGER.warn("Can't parse");
