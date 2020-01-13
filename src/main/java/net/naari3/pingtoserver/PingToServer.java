@@ -22,7 +22,7 @@ public class PingToServer {
     private static final Logger LOGGER = LogManager.getLogger();
 
     private PingToServerState state;
-    private Pinger pinger;
+    private IcmpPinger pinger;
 
     public PingToServer() {
         this.state = new PingToServerState();
@@ -71,7 +71,7 @@ public class PingToServer {
         if (event.getResult() == Event.Result.DEFAULT) {
             ServerData server = Minecraft.getInstance().getCurrentServerData();
             if (server != null) {
-                this.pinger = new Pinger(server.serverIP, 5000);
+                this.pinger = new IcmpPinger(server.serverIP, 5000);
                 this.state.start();
                 LOGGER.info(server.serverIP);
             }

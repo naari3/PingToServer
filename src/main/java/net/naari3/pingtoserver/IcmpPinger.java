@@ -8,7 +8,7 @@ import org.icmp4j.IcmpPingUtil;
 
 import java.io.IOException;
 
-public class Pinger {
+public class IcmpPinger {
     private static final Logger LOGGER = LogManager.getLogger();
 
     private String host;
@@ -18,7 +18,7 @@ public class Pinger {
     private boolean isSuccess;
     private boolean isTimeouted;
 
-    public Pinger(String host, int timeout) {
+    public IcmpPinger(String host, int timeout) {
         this.host = host;
         this.timeout = timeout;
     }
