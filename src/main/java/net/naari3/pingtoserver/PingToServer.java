@@ -94,11 +94,7 @@ public class PingToServer {
         tickCounter++;
         if (tickCounter > 20) {
             if (this.state.isStarted() && this.pinger != null) {
-                try {
-                    this.pinger.ping();
-                } catch (IOException err) {
-                    LOGGER.warn(err);
-                }
+                this.pinger.pingAsync();
             }
             tickCounter = 0;
         }
