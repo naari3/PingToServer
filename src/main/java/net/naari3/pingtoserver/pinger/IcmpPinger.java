@@ -5,12 +5,11 @@ import org.icmp4j.IcmpPingResponse;
 import org.icmp4j.IcmpPingUtil;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 public class IcmpPinger extends Pinger {
-    public IcmpPinger(String host, int timeout) {
+    public IcmpPinger(String host, int timeout) throws URISyntaxException {
         super(host, timeout);
-        this.host = host;
-        this.timeout = timeout;
     }
 
     public boolean ping() throws IOException {

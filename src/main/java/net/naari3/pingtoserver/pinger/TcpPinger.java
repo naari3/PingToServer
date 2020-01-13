@@ -4,21 +4,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.URISyntaxException;
 
 public class TcpPinger extends Pinger {
     private int port = 25565;
 
-    TcpPinger(String host, int timeout) {
+    public TcpPinger(String host, int timeout) throws URISyntaxException {
         super(host, timeout);
-        this.timeout = timeout;
-
-        if (host.contains(":")) {
-            String[] hostAndPort = host.split(":");
-            this.host = hostAndPort[0];
-            this.port = Integer.parseInt(hostAndPort[1]);
-        } else {
-            this.host = host;
-        }
     }
 
     public boolean ping() throws IOException {

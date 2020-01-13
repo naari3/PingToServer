@@ -16,6 +16,8 @@ import net.naari3.pingtoserver.pinger.IcmpPinger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.URISyntaxException;
+
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("pingtoserver")
 public class PingToServer {
@@ -72,9 +74,13 @@ public class PingToServer {
         if (event.getResult() == Event.Result.DEFAULT) {
             ServerData server = Minecraft.getInstance().getCurrentServerData();
             if (server != null) {
-                this.pinger = new IcmpPinger(server.serverIP, 5000);
-                this.state.start();
                 LOGGER.info(server.serverIP);
+                try {
+                    this.pinger = new IcmpPinger(server.serverIP, 5000);
+                    this.state.start();
+                } catch (URISyntaxException err) {
+                    LOGGER.warn("Can't parse");
+                }
             }
             LOGGER.info("LOGGED IN");
         }
