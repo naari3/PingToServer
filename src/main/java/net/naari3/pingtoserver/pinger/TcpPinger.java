@@ -24,13 +24,19 @@ public class TcpPinger extends Pinger {
 
             this.responseTime = end - start;
             this.isSuccess = true;
+            LOGGER.debug(String.format("%s response: %d ms", this.host, this.responseTime));
+
             return true;
         } catch (SocketTimeoutException err) {
+            LOGGER.warn(String.format("%s timeout", this.host));
+
             this.isTimeouted = false;
             this.isSuccess = false;
 
             return false;
         } catch (IOException err) {
+            LOGGER.warn("Cannot connect to %s", this.host);
+
             this.isSuccess = false;
             throw err;
         }
