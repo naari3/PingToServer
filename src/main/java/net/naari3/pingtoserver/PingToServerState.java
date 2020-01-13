@@ -12,11 +12,27 @@ public class PingToServerState {
         this.status = PingStatus.NotStarted;
     }
 
-    public PingStatus getStatus()  {
+    private PingStatus getStatus()  {
         return this.status;
     }
 
-    public void setStatus(PingStatus status) {
+    private void setStatus(PingStatus status) {
         this.status = status;
+    }
+
+    public void start() {
+        setStatus(PingStatus.Started);
+    }
+
+    public void stop() {
+        setStatus(PingStatus.NotStarted);
+    }
+
+    public boolean isStarted() {
+        return this.status == PingStatus.Started;
+    }
+
+    public boolean isStopped() {
+        return this.status == PingStatus.NotStarted;
     }
 }
