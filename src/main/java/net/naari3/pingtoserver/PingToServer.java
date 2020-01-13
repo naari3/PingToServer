@@ -51,7 +51,9 @@ public class PingToServer {
 
     private void onWorldUnload(WorldEvent.Unload event) {
         LOGGER.info("Unload World {}", event);
-        this.state.stop();
+        if (this.state != null && this.state.isStarted()) {
+            this.state.stop();
+        }
     }
 
     public void onRenderGameOverlayEvent(RenderGameOverlayEvent event) {
